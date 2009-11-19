@@ -4,13 +4,12 @@
 
 Summary: 	Online hand recognition system with machine learning
 Name: 		zinnia
-Version: 	0.02
-Release: 	%mkrel 3
+Version: 	0.05
+Release: 	%mkrel 1
 License: 	BSD
 Group: 		System/Internationalization
 Source: 	http://downloads.sourceforge.net/zinnia/%name-%version.tar.gz
-Patch0:		zinnia-0.02-bindings.patch
-Patch1:		zinnia-0.02-fix-str-fmt.patch
+Patch0:		zinnia-0.05-bindings.patch
 URL: 		http://zinnia.sourceforge.net/
 Buildroot: 	%{_tmppath}/%{name}-%{version}-buildroot
 BuildRequires:	perl-devel python-devel
@@ -36,6 +35,7 @@ This package contains shared libraries for %name.
 Summary:	Development files for %name
 Group:		System/Internationalization
 Requires:	%libname = %version
+Requires:	pkgconfig
 Provides:	%name-devel = %version-%release
 
 %description -n %develname
@@ -57,8 +57,7 @@ This package contains python bindings for %name.
 
 %prep
 %setup -q -n %{name}-%{version}
-%patch0 -p0
-%patch1 -p0
+%patch0 -p1 -b .bindings
 
 %build
 %configure2_5x --disable-static
@@ -100,8 +99,10 @@ rm -rf %{buildroot}
 %defattr (-,root,root)
 %doc doc/*
 %{_includedir}/*.h
+%{_includedir}/%{name}
 %{_libdir}/*.so
 %{_libdir}/*.la
+%{_libdir}/pkgconfig/%{name}.pc
 
 %files -n perl-%name
 %defattr (-,root,root)
