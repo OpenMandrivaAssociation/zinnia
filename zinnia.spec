@@ -4,8 +4,8 @@
 
 Summary: 	Online hand recognition system with machine learning
 Name: 		zinnia
-Version: 	0.05
-Release: 	%mkrel 2
+Version: 	0.06
+Release: 	%mkrel 1
 License: 	BSD
 Group: 		System/Internationalization
 Source: 	http://downloads.sourceforge.net/zinnia/%name-%version.tar.gz
@@ -13,7 +13,6 @@ Patch0:		zinnia-0.05-bindings.patch
 URL: 		http://zinnia.sourceforge.net/
 Buildroot: 	%{_tmppath}/%{name}-%{version}-buildroot
 BuildRequires:	perl-devel python-devel
-Suggests: 	zinnia-tomoe
 
 %description
 Zinnia is a simple, customizable and portable online hand recognition
