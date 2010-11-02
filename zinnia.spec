@@ -43,6 +43,7 @@ This package contains development files for %name.
 %package -n perl-%name
 Summary:	Perl bindings for %name
 Group:		Development/Perl
+Requires:	%{name} = %{version}
 
 %description -n perl-%name
 This package contains perl bindings for %name.
@@ -50,6 +51,8 @@ This package contains perl bindings for %name.
 %package -n python-%name
 Summary:	Python bindings for %name
 Group:		Development/Python
+Requires:	%{name} = %{version}
+Provides:	tegaki-engine
 
 %description -n python-%name
 This package contains python bindings for %name.
