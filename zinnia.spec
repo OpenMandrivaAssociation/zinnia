@@ -33,7 +33,6 @@ This package contains shared libraries for %{name}.
 Summary:	Development files for %{name}
 Group:		System/Internationalization
 Requires:	%{libname} = %{version}
-Requires:	pkgconfig
 Provides:	%{name}-devel = %{version}-%{release}
 
 %description -n	%{devname}
