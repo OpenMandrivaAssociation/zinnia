@@ -4,7 +4,7 @@ Version: 	0.06
 Release:	3
 License: 	BSD
 Group: 		System/Internationalization
-Source0: 	http://downloads.sourceforge.net/zinnia/%{name}-%version.tar.gz
+Source0: 	http://downloads.sourceforge.net/zinnia/%{name}-%{version}.tar.gz
 Patch0:		zinnia-0.05-bindings.patch
 URL: 		http://zinnia.sourceforge.net/
 BuildRequires:	perl-devel python-devel
@@ -32,8 +32,8 @@ This package contains shared libraries for %{name}.
 %package -n	%{devname}
 Summary:	Development files for %{name}
 Group:		System/Internationalization
-Requires:	%{libname} = %{version}
-Provides:	%{name}-devel = %{version}-%{release}
+Requires:	%{libname} = %{EVRD}
+Provides:	%{name}-devel = %{EVRD}
 
 %description -n	%{devname}
 This package contains development files for %{name}.
@@ -41,7 +41,7 @@ This package contains development files for %{name}.
 %package -n	perl-%{name}
 Summary:	Perl bindings for %{name}
 Group:		Development/Perl
-Requires:	%{name} = %{version}
+Requires:	%{name} = %{EVRD}
 
 %description -n	perl-%{name}
 This package contains perl bindings for %{name}.
@@ -49,7 +49,7 @@ This package contains perl bindings for %{name}.
 %package -n	python-%{name}
 Summary:	Python bindings for %{name}
 Group:		Development/Python
-Requires:	%{name} = %{version}
+Requires:	%{name} = %{EVRD}
 Provides:	tegaki-engine
 
 %description -n	python-%{name}
