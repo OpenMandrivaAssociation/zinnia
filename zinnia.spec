@@ -1,7 +1,7 @@
 Summary: 	Online hand recognition system with machine learning
 Name: 		zinnia
 Version: 	0.06
-Release:	3
+Release:	4
 License: 	BSD
 Group: 		System/Internationalization
 Source0: 	http://downloads.sourceforge.net/zinnia/%{name}-%{version}.tar.gz
@@ -82,21 +82,25 @@ python setup.py install --root=%{buildroot}
 popd
 
 %files
-%{_bindir}/*
+%{_bindir}/zinnia*
 
 %files -n %{libname}
-%{_libdir}/*.so.%{major}*
+%{_libdir}/libzinnia.so.%{major}*
 
 %files -n %{devname}
 %doc doc/*
-%{_includedir}/*.h
-%{_includedir}/%{name}
-%{_libdir}/*.so
+%{_includedir}/zinnia.h
+%dir %{_includedir}/%{name}
+%{_includedir}/%{name}/zinnia.h
+%{_libdir}/libzinnia.so
 %{_libdir}/pkgconfig/%{name}.pc
 
 %files -n perl-%{name}
+%dir %{perl_vendorarch}/auto/zinnia
 %{perl_vendorarch}/auto/zinnia/zinnia.so
 %{perl_vendorarch}/zinnia.pm
 
 %files -n python-%{name}
-%{py_platsitedir}/*
+%{py_platsitedir}/_zinnia.so
+%{py_platsitedir}/zinnia.py
+%{py_platsitedir}/zinnia_python-*-py%{py_ver}.egg-info
