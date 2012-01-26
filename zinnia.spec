@@ -103,7 +103,6 @@ rm -rf %{buildroot}
 %{_includedir}/*.h
 %{_includedir}/%{name}
 %{_libdir}/*.so
-%{_libdir}/*.la
 %{_libdir}/pkgconfig/%{name}.pc
 
 %files -n perl-%name
