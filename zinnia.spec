@@ -104,3 +104,50 @@ popd
 %{py_platsitedir}/_zinnia.so
 %{py_platsitedir}/zinnia.py
 %{py_platsitedir}/zinnia_python-*-py%{py_ver}.egg-info
+
+
+%changelog
+* Thu Jan 26 2012 Per Øyvind Karlsen <peroyvind@mandriva.org> 0.06-4
++ Revision: 769065
+- be more explicit in %%files manifest
+- use %%{EVRD} macro
+- drop redundant pkgconfig dependency
+- cleanups
+- drop libtool .la files that's now removed by spec-helper
+- svn commit -m mass rebuild of perl extension against perl 5.14.2
+
+* Sat May 14 2011 Funda Wang <fwang@mandriva.org> 0.06-2
++ Revision: 674597
+- rebuild
+
+* Tue Nov 02 2010 Funda Wang <fwang@mandriva.org> 0.06-1mdv2011.0
++ Revision: 592289
+- add requires
+- new version 0.06
+
+* Thu Jul 22 2010 Jérôme Quelin <jquelin@mandriva.org> 0.05-2mdv2011.0
++ Revision: 556784
+- perl 5.12 rebuild
+
+* Thu Nov 19 2009 Jérôme Brenier <incubusss@mandriva.org> 0.05-1mdv2010.1
++ Revision: 467434
+- new version 0.05
+- rediff P0
+- drop P1 (no more needed)
+- requires : pkgconfig for the devel subpackage
+- fix files section
+
+* Mon Sep 21 2009 Thierry Vignaud <tv@mandriva.org> 0.02-3mdv2010.0
++ Revision: 446318
+- rebuild
+
+* Sun Feb 15 2009 Funda Wang <fwang@mandriva.org> 0.02-2mdv2009.1
++ Revision: 340609
+- bump rel
+- add bindings build
+
+* Sun Feb 15 2009 Funda Wang <fwang@mandriva.org> 0.02-1mdv2009.1
++ Revision: 340500
+- import zinnia
+
+
