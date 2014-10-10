@@ -7,7 +7,8 @@ Group: 		System/Internationalization
 Source0: 	http://downloads.sourceforge.net/zinnia/%{name}-%{version}.tar.gz
 Patch0:		zinnia-0.05-bindings.patch
 URL: 		http://zinnia.sourceforge.net/
-BuildRequires:	perl-devel python-devel
+BuildRequires:	perl-devel
+BuildRequires:	pkgconfig(python2)
 
 %description
 Zinnia is a simple, customizable and portable online hand recognition
@@ -69,7 +70,7 @@ pushd perl
 popd
 
 pushd python
-CFLAGS="%{optflags} -I../" LDFLAGS="-L../.libs" python setup.py build
+CFLAGS="%{optflags} -I../" LDFLAGS="-L../.libs" %__python2 setup.py build
 popd
 
 %install
@@ -78,8 +79,10 @@ popd
 %makeinstall_std -C perl
 
 pushd python
-python setup.py install --root=%{buildroot}
+%__python2 setup.py install --root=%{buildroot}
 popd
+
+find %{buildroot} -name "*.pyc" -exec rm -f {} \;
 
 %files
 %{_bindir}/zinnia*
@@ -101,9 +104,9 @@ popd
 %{perl_vendorarch}/zinnia.pm
 
 %files -n python-%{name}
-%{py_platsitedir}/_zinnia.so
-%{py_platsitedir}/zinnia.py
-%{py_platsitedir}/zinnia_python-*-py%{py_ver}.egg-info
+%{py2_platsitedir}/_zinnia.so
+%{py2_platsitedir}/zinnia.py
+%{py2_platsitedir}/zinnia_python-*-py%{py2_ver}.egg-info
 
 
 %changelog
