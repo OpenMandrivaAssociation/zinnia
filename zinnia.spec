@@ -6,6 +6,8 @@ License: 	BSD
 Group: 		System/Internationalization
 Source0: 	http://downloads.sourceforge.net/zinnia/%{name}-%{version}.tar.gz
 Patch0:		zinnia-0.05-bindings.patch
+# Fix compile on clang.
+Patch1:   fix-compile-std-make-pair.patch
 URL: 		http://zinnia.sourceforge.net/
 BuildRequires:	perl-devel
 BuildRequires:	pkgconfig(python2)
@@ -58,11 +60,13 @@ This package contains python bindings for %{name}.
 
 %prep
 %setup -q
-%patch0 -p1 -b .bindings~
+%autopatch -p1
 
 %build
+# fix build on aarch64
+autoreconf -vfi
 %configure2_5x --disable-static
-%make
+%make_build
 
 pushd perl
 %{__perl} Makefile.PL INSTALLDIRS=vendor
@@ -74,9 +78,9 @@ CFLAGS="%{optflags} -I../" LDFLAGS="-L../.libs" %__python2 setup.py build
 popd
 
 %install
-%makeinstall_std
+%make_install
 
-%makeinstall_std -C perl
+%make_install -C perl
 
 pushd python
 %__python2 setup.py install --root=%{buildroot}
