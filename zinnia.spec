@@ -1,7 +1,7 @@
 Summary: 	Online hand recognition system with machine learning
 Name: 		zinnia
 Version: 	0.06
-Release:	13
+Release:	14
 License: 	BSD
 Group: 		System/Internationalization
 Source0: 	http://downloads.sourceforge.net/zinnia/%{name}-%{version}.tar.gz
@@ -109,7 +109,7 @@ find %{buildroot} -name "*.pyc" -exec rm -f {} \;
 
 %files -n python-%{name}
 %{py2_platsitedir}/_zinnia.so
-%{py2_platsitedir}/zinnia.py
+%{py2_platsitedir}/zinnia.py*
 %{py2_platsitedir}/zinnia_python-*-py%{py2_ver}.egg-info
 
 
