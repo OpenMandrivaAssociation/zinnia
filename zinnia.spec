@@ -1,9 +1,10 @@
 Summary: 	Online hand recognition system with machine learning
 Name: 		zinnia
-Version: 	0.06
-Release:	14
+Version: 	0.07
+Release:	1
 License: 	BSD
 Group: 		System/Internationalization
+Source0: 	https://github.com/silverhikari/zinnia/releases/download/%{version}/zinnia-%{version}.tar.gz
 Source0: 	http://downloads.sourceforge.net/zinnia/%{name}-%{version}.tar.gz
 Patch0:		zinnia-0.05-bindings.patch
 # Fix compile on clang.
