@@ -11,7 +11,7 @@ Patch0:		zinnia-0.05-bindings.patch
 #Patch1:   fix-compile-std-make-pair.patch
 URL: 		http://zinnia.sourceforge.net/
 BuildRequires:	perl-devel
-BuildRequires:	pkgconfig(python2)
+BuildRequires:	pkgconfig(python3)
 
 %description
 Zinnia is a simple, customizable and portable online hand recognition
@@ -60,14 +60,17 @@ Provides:	tegaki-engine
 This package contains python bindings for %{name}.
 
 %prep
-%setup -q
-%autopatch -p1
+%autosetup -p1
 
 %build
 # fix build on aarch64
 autoreconf -vfi
-%configure2_5x --disable-static
+%configure --disable-static
 %make_build
+
+pushd swig
+make perl python ruby java
+cd ..
 
 pushd perl
 %{__perl} Makefile.PL INSTALLDIRS=vendor
@@ -75,7 +78,7 @@ pushd perl
 popd
 
 pushd python
-CFLAGS="%{optflags} -I../" LDFLAGS="-L../.libs" %__python2 setup.py build
+CFLAGS="%{optflags} -I../" LDFLAGS="-L../.libs" python setup.py build
 popd
 
 %install
@@ -84,7 +87,7 @@ popd
 %make_install -C perl
 
 pushd python
-%__python2 setup.py install --root=%{buildroot}
+python setup.py install --root=%{buildroot}
 popd
 
 find %{buildroot} -name "*.pyc" -exec rm -f {} \;
@@ -109,53 +112,6 @@ find %{buildroot} -name "*.pyc" -exec rm -f {} \;
 %{perl_vendorarch}/zinnia.pm
 
 %files -n python-%{name}
-%{py2_platsitedir}/_zinnia.so
-%{py2_platsitedir}/zinnia.py*
-%{py2_platsitedir}/zinnia_python-*-py%{py2_ver}.egg-info
-
-
-%changelog
-* Thu Jan 26 2012 Per Øyvind Karlsen <peroyvind@mandriva.org> 0.06-4
-+ Revision: 769065
-- be more explicit in %%files manifest
-- use %%{EVRD} macro
-- drop redundant pkgconfig dependency
-- cleanups
-- drop libtool .la files that's now removed by spec-helper
-- svn commit -m mass rebuild of perl extension against perl 5.14.2
-
-* Sat May 14 2011 Funda Wang <fwang@mandriva.org> 0.06-2
-+ Revision: 674597
-- rebuild
-
-* Tue Nov 02 2010 Funda Wang <fwang@mandriva.org> 0.06-1mdv2011.0
-+ Revision: 592289
-- add requires
-- new version 0.06
-
-* Thu Jul 22 2010 Jérôme Quelin <jquelin@mandriva.org> 0.05-2mdv2011.0
-+ Revision: 556784
-- perl 5.12 rebuild
-
-* Thu Nov 19 2009 Jérôme Brenier <incubusss@mandriva.org> 0.05-1mdv2010.1
-+ Revision: 467434
-- new version 0.05
-- rediff P0
-- drop P1 (no more needed)
-- requires : pkgconfig for the devel subpackage
-- fix files section
-
-* Mon Sep 21 2009 Thierry Vignaud <tv@mandriva.org> 0.02-3mdv2010.0
-+ Revision: 446318
-- rebuild
-
-* Sun Feb 15 2009 Funda Wang <fwang@mandriva.org> 0.02-2mdv2009.1
-+ Revision: 340609
-- bump rel
-- add bindings build
-
-* Sun Feb 15 2009 Funda Wang <fwang@mandriva.org> 0.02-1mdv2009.1
-+ Revision: 340500
-- import zinnia
-
-
+%{py_platsitedir}/_zinnia.*.so
+%{py_platsitedir}/zinnia.py*
+%{py_platsitedir}/zinnia_python-*info
