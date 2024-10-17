@@ -9,7 +9,7 @@ Source0: 	https://github.com/silverhikari/zinnia/releases/download/%{version}/zi
 Patch0:		zinnia-0.05-bindings.patch
 # Fix compile on clang.
 #Patch1:   fix-compile-std-make-pair.patch
-URL: 		http://zinnia.sourceforge.net/
+URL: 		https://zinnia.sourceforge.net/
 BuildRequires:	swig
 BuildRequires:	perl-devel
 BuildRequires:	pkgconfig(python3)
