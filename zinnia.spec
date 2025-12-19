@@ -12,6 +12,7 @@ Patch0:		zinnia-0.05-bindings.patch
 URL: 		https://zinnia.sourceforge.net/
 BuildRequires:  automake
 BuildRequires:  autoconf
+BuildRequires:  m4
 BuildRequires:  make
 BuildRequires:	swig
 BuildRequires:	perl-devel
