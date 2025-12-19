@@ -10,6 +10,8 @@ Patch0:		zinnia-0.05-bindings.patch
 # Fix compile on clang.
 #Patch1:   fix-compile-std-make-pair.patch
 URL: 		https://zinnia.sourceforge.net/
+BuildRequires:  autoconf
+BuildRequires:  make
 BuildRequires:	swig
 BuildRequires:	perl-devel
 BuildRequires:	pkgconfig(python3)
