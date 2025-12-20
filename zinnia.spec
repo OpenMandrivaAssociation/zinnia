@@ -13,6 +13,7 @@ URL: 		https://zinnia.sourceforge.net/
 BuildRequires:  automake
 BuildRequires:  autoconf
 BuildRequires:  libtool
+BuildRequires:  slibtool
 BuildRequires:  m4
 BuildRequires:  make
 BuildRequires:	swig
