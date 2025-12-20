@@ -19,6 +19,8 @@ BuildRequires:  make
 BuildRequires:	swig
 BuildRequires:	perl-devel
 BuildRequires:	pkgconfig(python3)
+BuildRequires:  python%{pyver}dist(setuptools)
+BuildRequires:  python%{pyver}dist(pip)
 
 %description
 Zinnia is a simple, customizable and portable online hand recognition
