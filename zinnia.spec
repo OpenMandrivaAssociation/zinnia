@@ -1,7 +1,7 @@
 Summary: 	Online hand recognition system with machine learning
 Name: 		zinnia
 Version: 	0.07
-Release:6
+Release:7
 License: 	BSD
 Group: 		System/Internationalization
 Source0: 	https://github.com/silverhikari/zinnia/releases/download/%{version}/zinnia-%{version}.tar.gz
@@ -78,23 +78,25 @@ autoreconf -vfi
 %configure --disable-static
 %make_build
 
+# SWIG/perl/python wraps #include "zinnia.h" — header is in source root
+cp -a zinnia.h swig/ 2>/dev/null || true
+cp -a zinnia.h perl/ 2>/dev/null || true
+cp -a zinnia.h python/ 2>/dev/null || true
+
 pushd swig
-# headers live in top-level source dir; swig wraps need -I..
-export CPPFLAGS="%{optflags} -I$(pwd) -I$(pwd)/."
-export CFLAGS="%{optflags} -I$(pwd)"
-export CXXFLAGS="%{optflags} -I$(pwd)"
-make perl python ruby java CPPFLAGS="$CPPFLAGS" CFLAGS="$CFLAGS" CXXFLAGS="$CXXFLAGS"
-cd ..
+%make_build perl python ruby java \
+	CPPFLAGS="-I.. -I." \
+	CFLAGS="%{optflags} -I.. -I." \
+	CXXFLAGS="%{optflags} -I.. -I."
+popd
 
 pushd perl
-cp -f ../zinnia.h . 2>/dev/null || cp -f ../libzinnia/zinnia.h . 2>/dev/null || true
-ls -la zinnia.h ../*.h 2>/dev/null || true
-CFLAGS="%{optflags} -I.. -I../. -I." %{__perl} Makefile.PL INSTALLDIRS=vendor INC="-I.. -I../. -I."
-%{__make} OPTIMIZE="%{optflags} -I.. -I../."
+%{__perl} Makefile.PL INSTALLDIRS=vendor INC="-I.. -I."
+%{__make} OPTIMIZE="%{optflags} -I.. -I."
 popd
 
 pushd python
-CFLAGS="%{optflags} -I../" LDFLAGS="-L../.libs" python setup.py build
+CFLAGS="%{optflags} -I.. -I." LDFLAGS="-L../.libs" python setup.py build
 popd
 
 %install
