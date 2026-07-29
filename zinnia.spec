@@ -5,16 +5,15 @@
 Summary: 	Online hand recognition system with machine learning
 Name: 		zinnia
 Version: 	0.07
-Release:	13
+Release:	14
 License: 	BSD
 Group: 		System/Internationalization
 Source0: 	https://github.com/silverhikari/zinnia/releases/download/%{version}/zinnia-%{version}.tar.gz
 Patch0:		zinnia-0.05-bindings.patch
 URL: 		https://zinnia.sourceforge.net/
-BuildRequires:	libtool-base
+BuildRequires:	slibtool
 BuildRequires:  automake
 BuildRequires:  autoconf
-BuildRequires:  libtool
 BuildRequires:  m4
 BuildRequires:  make
 BuildRequires:	swig
@@ -63,12 +62,10 @@ This package contains perl bindings for %{name}.
 
 %build
 autoreconf -vfi
-# Force GNU libtool
+# Prefer slibtool; do not force GNU libtool
+export LIBTOOL=slibtool
 %configure --disable-static
-if [ -x /usr/bin/libtool ]; then
-  cp -a /usr/bin/libtool ./libtool
-fi
-%make_build
+%make_build LIBTOOL=slibtool
 
 # Hard requirement: shared library must exist
 ls -la .libs
@@ -114,7 +111,7 @@ popd
 
 %install
 %make_install
-# ensure libs installed (slibtool can skip)
+# ensure libs installed if slibtool skipped them
 install -d %{buildroot}%{_libdir}
 for f in .libs/libzinnia.so*; do
   [ -e "$f" ] || continue
