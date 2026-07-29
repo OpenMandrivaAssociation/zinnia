@@ -1,7 +1,7 @@
 Summary: 	Online hand recognition system with machine learning
 Name: 		zinnia
 Version: 	0.07
-Release:11
+Release:12
 License: 	BSD
 Group: 		System/Internationalization
 Source0: 	https://github.com/silverhikari/zinnia/releases/download/%{version}/zinnia-%{version}.tar.gz
@@ -106,21 +106,32 @@ make -j1 perl \
 popd
 
 pushd perl
-# link against staged or in-tree shared library
-ZLIB=$(ls -1 ../.libs/libzinnia.so* $STAGE_LIB/libzinnia.so* 2>/dev/null | head -1)
-echo "Using zinnia lib: $ZLIB"
-%{__perl} Makefile.PL INSTALLDIRS=vendor \
-	INC="-I.. -I. -I$STAGE_INC" \
-	LIBS="-L../.libs -L$STAGE_LIB -lzinnia"
+# discover built library (name/path varies with libtool)
+find .. -name 'libzinnia.so*' -o -name 'libzinnia.a' 2>/dev/null | head -20
+LIBDIR=$(find .. -name 'libzinnia.so*' -printf '%h
+' 2>/dev/null | head -1)
+LIBDIR=${LIBDIR:-../.libs}
+# create unversioned symlink for -lzinnia
+if [ -d "$LIBDIR" ]; then
+  (cd "$LIBDIR" && for f in libzinnia.so.*; do [ -f "$f" ] && ln -sf "$f" libzinnia.so && break; done)
+  ls -la "$LIBDIR"
+fi
+%{__perl} Makefile.PL INSTALLDIRS=vendor INC="-I.. -I. -I$STAGE_INC" LIBS="-L$LIBDIR -lzinnia"
+# rebuild Makefile link line with absolute path
+ABS_LIBDIR=$(cd "$LIBDIR" && pwd)
 sed -i \
-	-e "s|^LD_RUN_PATH.*|LD_RUN_PATH =|" \
-	-e "s|^LDLOADLIBS.*|LDLOADLIBS = -L../.libs -L$STAGE_LIB -lzinnia|" \
-	-e "s|^OTHERLDFLAGS.*|OTHERLDFLAGS = -L../.libs -L$STAGE_LIB -Wl,-rpath-link,../.libs -Wl,-rpath-link,$STAGE_LIB -lzinnia|" \
-	Makefile
-# if still needed, link with explicit .so path
-%{__make} OPTIMIZE="%{optflags} -I.. -I." LDLOADLIBS="-L../.libs -L$STAGE_LIB -lzinnia" \
-	OTHERLDFLAGS="-L../.libs -L$STAGE_LIB -Wl,-rpath-link,../.libs" || \
-	c++ -shared -o blib/arch/auto/zinnia/zinnia.so zinnia_wrap.o -L../.libs -L$STAGE_LIB -lzinnia -lperl -lpthread
+  -e "s|^LDLOADLIBS.*|LDLOADLIBS = -L$ABS_LIBDIR -lzinnia|" \
+  -e "s|^OTHERLDFLAGS.*|OTHERLDFLAGS = -L$ABS_LIBDIR -Wl,-rpath-link,$ABS_LIBDIR|" \
+  -e "s|^LD_RUN_PATH.*|LD_RUN_PATH =|" \
+  Makefile
+export LIBRARY_PATH="$ABS_LIBDIR:${LIBRARY_PATH:-}"
+export LD_LIBRARY_PATH="$ABS_LIBDIR:${LD_LIBRARY_PATH:-}"
+%{__make} OPTIMIZE="%{optflags} -I.. -I." \
+  LDLOADLIBS="-L$ABS_LIBDIR -lzinnia" \
+  OTHERLDFLAGS="-L$ABS_LIBDIR -Wl,-rpath-link,$ABS_LIBDIR" || \
+  c++ -shared -o blib/arch/auto/zinnia/zinnia.so \
+    $(find . -name 'zinnia_wrap.o' | head -1) \
+    -L$ABS_LIBDIR -lzinnia -lperl -lpthread
 popd
 
 # skip python/ruby/java for a reliable perl package rebuild
