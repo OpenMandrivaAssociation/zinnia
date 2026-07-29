@@ -5,7 +5,7 @@
 Summary: 	Online hand recognition system with machine learning
 Name: 		zinnia
 Version: 	0.07
-Release:	17
+Release:	18
 License: 	BSD
 Group: 		System/Internationalization
 Source0: 	https://github.com/silverhikari/zinnia/releases/download/%{version}/zinnia-%{version}.tar.gz
@@ -147,6 +147,10 @@ for f in .libs/libzinnia.so* .libs/libzinnia.a; do
 done
 # also try non-hidden install from make for lib only
 make DESTDIR=%{buildroot} install-libLTLIBRARIES INSTALL="install -p" 2>/dev/null || true
+# do not ship static lib/libtool archives; debuginfo needs write on .so
+rm -f %{buildroot}%{_libdir}/libzinnia.a %{buildroot}%{_libdir}/libzinnia.la
+chmod -R u+w %{buildroot} || true
+
 ( cd %{buildroot}%{_libdir}
   # prefer real shared object
   if [ ! -e libzinnia.so.0 ] && [ -e libzinnia.so.0.0.0 ]; then
