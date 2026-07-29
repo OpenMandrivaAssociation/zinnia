@@ -5,7 +5,7 @@
 Summary: 	Online hand recognition system with machine learning
 Name: 		zinnia
 Version: 	0.07
-Release:	16
+Release:	17
 License: 	BSD
 Group: 		System/Internationalization
 Source0: 	https://github.com/silverhikari/zinnia/releases/download/%{version}/zinnia-%{version}.tar.gz
@@ -130,20 +130,23 @@ test -f blib/arch/auto/zinnia/zinnia.so
 popd
 
 %install
-# make install-binPROGRAMS can execute the zinnia binary (model open fails).
-# Install library/headers first, then copy binaries from .libs without running them.
-%make_install install-libLTLIBRARIES install-includeHEADERS install-pkgincludeHEADERS install-pkgconfigDATA 2>/dev/null || \
-%make_install -i || true
+# Do not run full "make install" (bin install executes zinnia looking for a model).
+install -d %{buildroot}%{_libdir} %{buildroot}%{_bindir} %{buildroot}%{_includedir} %{buildroot}%{_includedir}/zinnia %{buildroot}%{_libdir}/pkgconfig
 
-install -d %{buildroot}%{_libdir} %{buildroot}%{_bindir} %{buildroot}%{_includedir}
+# Copy shared library artifacts produced by slibtool/libtool
+ls -la .libs || true
 for f in .libs/libzinnia.so* .libs/libzinnia.a; do
   [ -e "$f" ] || continue
-  # skip slibtool metadata
   case "$f" in
-    *.def*|*.deps*|*.tmp*) continue ;;
+    *.def*|*.deps*|*.tmp*|*.lai|*.la) continue ;;
   esac
-  cp -a "$f" %{buildroot}%{_libdir}/ 2>/dev/null || true
+  # only real ELF .so / versioned libs
+  case "$f" in
+    *.so|*.so.*|*.a) cp -a "$f" %{buildroot}%{_libdir}/ ;;
+  esac
 done
+# also try non-hidden install from make for lib only
+make DESTDIR=%{buildroot} install-libLTLIBRARIES INSTALL="install -p" 2>/dev/null || true
 ( cd %{buildroot}%{_libdir}
   # prefer real shared object
   if [ ! -e libzinnia.so.0 ] && [ -e libzinnia.so.0.0.0 ]; then
