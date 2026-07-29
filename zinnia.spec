@@ -1,7 +1,7 @@
 Summary: 	Online hand recognition system with machine learning
 Name: 		zinnia
 Version: 	0.07
-Release:5
+Release:6
 License: 	BSD
 Group: 		System/Internationalization
 Source0: 	https://github.com/silverhikari/zinnia/releases/download/%{version}/zinnia-%{version}.tar.gz
@@ -79,11 +79,17 @@ autoreconf -vfi
 %make_build
 
 pushd swig
-make perl python ruby java
+# headers live in top-level source dir; swig wraps need -I..
+export CPPFLAGS="%{optflags} -I$(pwd) -I$(pwd)/."
+export CFLAGS="%{optflags} -I$(pwd)"
+export CXXFLAGS="%{optflags} -I$(pwd)"
+make perl python ruby java CPPFLAGS="$CPPFLAGS" CFLAGS="$CFLAGS" CXXFLAGS="$CXXFLAGS"
 cd ..
 
 pushd perl
-CFLAGS="%{optflags} -I.. -I../." %{__perl} Makefile.PL INSTALLDIRS=vendor INC="-I.. -I../."
+cp -f ../zinnia.h . 2>/dev/null || cp -f ../libzinnia/zinnia.h . 2>/dev/null || true
+ls -la zinnia.h ../*.h 2>/dev/null || true
+CFLAGS="%{optflags} -I.. -I../. -I." %{__perl} Makefile.PL INSTALLDIRS=vendor INC="-I.. -I../. -I."
 %{__make} OPTIMIZE="%{optflags} -I.. -I../."
 popd
 
