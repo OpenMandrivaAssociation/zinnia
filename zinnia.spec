@@ -1,7 +1,7 @@
 Summary: 	Online hand recognition system with machine learning
 Name: 		zinnia
 Version: 	0.07
-Release:8
+Release:9
 License: 	BSD
 Group: 		System/Internationalization
 Source0: 	https://github.com/silverhikari/zinnia/releases/download/%{version}/zinnia-%{version}.tar.gz
@@ -91,12 +91,15 @@ make -j1 perl python ruby java \
 popd
 
 pushd perl
-%{__perl} Makefile.PL INSTALLDIRS=vendor INC="-I.. -I."
+%{__perl} Makefile.PL INSTALLDIRS=vendor INC="-I.. -I." LIBS="-L../.libs -lzinnia"
+%{__make} OPTIMIZE="%{optflags} -I.. -I." OTHERLDFLAGS="-L../.libs -lzinnia" LD_RUN_PATH=""
+# force link path into generated Makefile
+sed -i -e 's|^LDLOADLIBS.*|LDLOADLIBS = -L../.libs -lzinnia|' -e 's|^OTHERLDFLAGS.*|OTHERLDFLAGS = -L../.libs -lzinnia|' Makefile 2>/dev/null || true
 %{__make} OPTIMIZE="%{optflags} -I.. -I."
 popd
 
 pushd python
-CFLAGS="%{optflags} -I.. -I." LDFLAGS="-L../.libs" python setup.py build
+CFLAGS="%{optflags} -I.. -I." LDFLAGS="-L../.libs -lzinnia" LIBRARY_PATH="../.libs:${LIBRARY_PATH:-}" python setup.py build
 popd
 
 %install
