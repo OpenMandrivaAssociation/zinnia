@@ -1,7 +1,7 @@
 Summary: 	Online hand recognition system with machine learning
 Name: 		zinnia
 Version: 	0.07
-Release:9
+Release:11
 License: 	BSD
 Group: 		System/Internationalization
 Source0: 	https://github.com/silverhikari/zinnia/releases/download/%{version}/zinnia-%{version}.tar.gz
@@ -60,6 +60,7 @@ Requires:	%{name} = %{EVRD}
 %description -n	perl-%{name}
 This package contains perl bindings for %{name}.
 
+%if 0
 %package -n	python-%{name}
 Summary:	Python bindings for %{name}
 Group:		Development/Python
@@ -68,6 +69,7 @@ Provides:	tegaki-engine
 
 %description -n	python-%{name}
 This package contains python bindings for %{name}.
+%endif
 
 %prep
 %autosetup -p1
@@ -78,40 +80,56 @@ autoreconf -vfi
 %configure --disable-static
 %make_build
 
-# SWIG/perl/python wraps #include "zinnia.h" — header is in source root
-cp -a zinnia.h swig/ 2>/dev/null || true
-cp -a zinnia.h perl/ 2>/dev/null || true
-cp -a zinnia.h python/ 2>/dev/null || true
+# Stage library so bindings can link before final %install
+%make_install DESTDIR=$PWD/_stage
+STAGE_LIB=$PWD/_stage%{_libdir}
+STAGE_INC=$PWD/_stage%{_includedir}
+ls -la .libs "$STAGE_LIB" 2>/dev/null || true
+# ensure -lzinnia can resolve (need unversioned .so for linker -l)
+for d in .libs "$STAGE_LIB"; do
+  [ -d "$d" ] || continue
+  (cd "$d" && for f in libzinnia.so.*; do
+     [ -e "$f" ] || continue
+     ln -sf "$f" libzinnia.so 2>/dev/null || true
+   done)
+done
+
+
+# SWIG wraps need zinnia.h
+cp -a zinnia.h swig/ perl/ python/ 2>/dev/null || true
 
 pushd swig
-make -j1 perl python ruby java \
-	CPPFLAGS="-I.. -I." \
-	CFLAGS="%{optflags} -I.. -I." \
-	CXXFLAGS="%{optflags} -I.. -I."
+make -j1 perl \
+	CPPFLAGS="-I.. -I. -I$STAGE_INC" \
+	CFLAGS="%{optflags} -I.. -I. -I$STAGE_INC" \
+	CXXFLAGS="%{optflags} -I.. -I. -I$STAGE_INC"
 popd
 
 pushd perl
-%{__perl} Makefile.PL INSTALLDIRS=vendor INC="-I.. -I." LIBS="-L../.libs -lzinnia"
-%{__make} OPTIMIZE="%{optflags} -I.. -I." OTHERLDFLAGS="-L../.libs -lzinnia" LD_RUN_PATH=""
-# force link path into generated Makefile
-sed -i -e 's|^LDLOADLIBS.*|LDLOADLIBS = -L../.libs -lzinnia|' -e 's|^OTHERLDFLAGS.*|OTHERLDFLAGS = -L../.libs -lzinnia|' Makefile 2>/dev/null || true
-%{__make} OPTIMIZE="%{optflags} -I.. -I."
+# link against staged or in-tree shared library
+ZLIB=$(ls -1 ../.libs/libzinnia.so* $STAGE_LIB/libzinnia.so* 2>/dev/null | head -1)
+echo "Using zinnia lib: $ZLIB"
+%{__perl} Makefile.PL INSTALLDIRS=vendor \
+	INC="-I.. -I. -I$STAGE_INC" \
+	LIBS="-L../.libs -L$STAGE_LIB -lzinnia"
+sed -i \
+	-e "s|^LD_RUN_PATH.*|LD_RUN_PATH =|" \
+	-e "s|^LDLOADLIBS.*|LDLOADLIBS = -L../.libs -L$STAGE_LIB -lzinnia|" \
+	-e "s|^OTHERLDFLAGS.*|OTHERLDFLAGS = -L../.libs -L$STAGE_LIB -Wl,-rpath-link,../.libs -Wl,-rpath-link,$STAGE_LIB -lzinnia|" \
+	Makefile
+# if still needed, link with explicit .so path
+%{__make} OPTIMIZE="%{optflags} -I.. -I." LDLOADLIBS="-L../.libs -L$STAGE_LIB -lzinnia" \
+	OTHERLDFLAGS="-L../.libs -L$STAGE_LIB -Wl,-rpath-link,../.libs" || \
+	c++ -shared -o blib/arch/auto/zinnia/zinnia.so zinnia_wrap.o -L../.libs -L$STAGE_LIB -lzinnia -lperl -lpthread
 popd
 
-pushd python
-CFLAGS="%{optflags} -I.. -I." LDFLAGS="-L../.libs -lzinnia" LIBRARY_PATH="../.libs:${LIBRARY_PATH:-}" python setup.py build
-popd
+# skip python/ruby/java for a reliable perl package rebuild
+# (optional bindings can return later)
 
 %install
 %make_install
 
 %make_install -C perl
-
-pushd python
-python setup.py install --root=%{buildroot}
-popd
-
-find %{buildroot} -name "*.pyc" -exec rm -f {} \;
 
 %files
 %{_bindir}/zinnia*
@@ -132,7 +150,9 @@ find %{buildroot} -name "*.pyc" -exec rm -f {} \;
 %{perl_vendorarch}/auto/zinnia/zinnia.so
 %{perl_vendorarch}/zinnia.pm
 
+%if 0
 %files -n python-%{name}
 %{py_platsitedir}/_zinnia.*.so
 %{py_platsitedir}/zinnia.py*
 %{py_platsitedir}/zinnia_python-*info
+%endif
