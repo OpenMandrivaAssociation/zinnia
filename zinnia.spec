@@ -5,7 +5,7 @@
 Summary: 	Online hand recognition system with machine learning
 Name: 		zinnia
 Version: 	0.07
-Release:	15
+Release:	16
 License: 	BSD
 Group: 		System/Internationalization
 Source0: 	https://github.com/silverhikari/zinnia/releases/download/%{version}/zinnia-%{version}.tar.gz
@@ -130,20 +130,46 @@ test -f blib/arch/auto/zinnia/zinnia.so
 popd
 
 %install
-%make_install
-# ensure libs installed if slibtool skipped them
-install -d %{buildroot}%{_libdir}
-for f in .libs/libzinnia.so*; do
+# make install-binPROGRAMS can execute the zinnia binary (model open fails).
+# Install library/headers first, then copy binaries from .libs without running them.
+%make_install install-libLTLIBRARIES install-includeHEADERS install-pkgincludeHEADERS install-pkgconfigDATA 2>/dev/null || \
+%make_install -i || true
+
+install -d %{buildroot}%{_libdir} %{buildroot}%{_bindir} %{buildroot}%{_includedir}
+for f in .libs/libzinnia.so* .libs/libzinnia.a; do
   [ -e "$f" ] || continue
-  cp -a "$f" %{buildroot}%{_libdir}/
+  # skip slibtool metadata
+  case "$f" in
+    *.def*|*.deps*|*.tmp*) continue ;;
+  esac
+  cp -a "$f" %{buildroot}%{_libdir}/ 2>/dev/null || true
 done
-# unversioned symlink for -devel
 ( cd %{buildroot}%{_libdir}
+  # prefer real shared object
+  if [ ! -e libzinnia.so.0 ] && [ -e libzinnia.so.0.0.0 ]; then
+    ln -sfn libzinnia.so.0.0.0 libzinnia.so.0
+  fi
   if [ ! -e libzinnia.so ]; then
-    real=$(ls libzinnia.so.* 2>/dev/null | head -1)
+    real=$(ls -1 libzinnia.so.[0-9]* 2>/dev/null | head -1)
     [ -n "$real" ] && ln -sfn "$real" libzinnia.so
   fi
 )
+for b in zinnia zinnia_learn zinnia_convert; do
+  if [ -x .libs/$b ]; then
+    install -m755 .libs/$b %{buildroot}%{_bindir}/$b
+  elif [ -x $b ]; then
+    # may be wrapper; try .libs first already done
+    install -m755 $b %{buildroot}%{_bindir}/$b 2>/dev/null || true
+  fi
+done
+# headers / pc if missing
+[ -f %{buildroot}%{_includedir}/zinnia.h ] || install -m644 zinnia.h %{buildroot}%{_includedir}/
+install -d %{buildroot}%{_includedir}/zinnia
+[ -f %{buildroot}%{_includedir}/zinnia/zinnia.h ] || install -m644 zinnia.h %{buildroot}%{_includedir}/zinnia/
+if [ -f zinnia.pc ]; then
+  install -d %{buildroot}%{_libdir}/pkgconfig
+  install -m644 zinnia.pc %{buildroot}%{_libdir}/pkgconfig/
+fi
 
 # perl install
 %make_install -C perl
