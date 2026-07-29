@@ -1,7 +1,7 @@
 Summary: 	Online hand recognition system with machine learning
 Name: 		zinnia
 Version: 	0.07
-Release:7
+Release:8
 License: 	BSD
 Group: 		System/Internationalization
 Source0: 	https://github.com/silverhikari/zinnia/releases/download/%{version}/zinnia-%{version}.tar.gz
@@ -84,7 +84,7 @@ cp -a zinnia.h perl/ 2>/dev/null || true
 cp -a zinnia.h python/ 2>/dev/null || true
 
 pushd swig
-%make_build perl python ruby java \
+make -j1 perl python ruby java \
 	CPPFLAGS="-I.. -I." \
 	CFLAGS="%{optflags} -I.. -I." \
 	CXXFLAGS="%{optflags} -I.. -I."
