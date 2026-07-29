@@ -5,7 +5,7 @@
 Summary: 	Online hand recognition system with machine learning
 Name: 		zinnia
 Version: 	0.07
-Release:	14
+Release:	15
 License: 	BSD
 Group: 		System/Internationalization
 Source0: 	https://github.com/silverhikari/zinnia/releases/download/%{version}/zinnia-%{version}.tar.gz
@@ -61,11 +61,31 @@ This package contains perl bindings for %{name}.
 %autosetup -p1
 
 %build
-autoreconf -vfi
-# Prefer slibtool; do not force GNU libtool
+# Prefer slibtool. Skip autoreconf: AC_PROG_LIBTOOL needs GNU libtool m4.
+# Upstream ships a working configure script.
 export LIBTOOL=slibtool
+# Ensure make uses slibtool when it invokes ./libtool
+if [ -x /usr/bin/slibtool ]; then
+  cat > libtool-wrapper.sh <<'EOS'
+#!/bin/sh
+exec slibtool "$@"
+EOS
+  chmod +x libtool-wrapper.sh
+  export LIBTOOL="$PWD/libtool-wrapper.sh"
+fi
 %configure --disable-static
-%make_build LIBTOOL=slibtool
+# Point generated libtool at slibtool if it is a config script (slibtoolize style)
+if [ -f libtool ] && head -1 libtool | grep -q '^#'; then
+  : # config-only, ok with slibtool via LIBTOOL=
+elif [ -f libtool ]; then
+  # replace binary/script with slibtool wrapper
+  cat > libtool <<'EOS'
+#!/bin/sh
+exec slibtool "$@"
+EOS
+  chmod +x libtool
+fi
+%make_build LIBTOOL="${LIBTOOL:-slibtool}"
 
 # Hard requirement: shared library must exist
 ls -la .libs
